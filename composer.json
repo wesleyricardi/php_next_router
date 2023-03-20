@@ -1,0 +1,14 @@
+{
+  "name": "next/router",
+  "description": "The Next router is a lightweight and user-friendly PHP router that allows developers to easily create routers by simply creating a file inside the src/pages/ directory, is based NextJs router system.",
+  "type": "composer-plugin",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Wesley Ricardi",
+      "email": "wesley.ricardi@outlook.com"
+    }
+  ],
+  "minimum-stability": "stable",
+  "require": {}
+}
