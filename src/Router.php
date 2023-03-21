@@ -4,7 +4,7 @@ namespace Next\Router;
 class Router
 {
     private static $dir;
-    public static function start($page_dir = "src/pages/")
+    public static function start(string $page_dir = "src/pages/"): void
     {
         $path = isset($_GET['path']) ? $_GET['path'] : "";
         self::$dir = $page_dir;
@@ -22,14 +22,7 @@ class Router
         self::router($pathArray, currentPath:0);
     }
 
-    /**
-     * @param array $pathArray
-     * @param int $currentPath
-     * @param string $foldersPath
-     * @param array $req
-     * @return void
-     */
-    private static function router(array $pathArray, int $currentPath, string $foldersPath = "", array $req = []) : void
+    private static function router(array $pathArray, int $currentPath, string $foldersPath = "", array $req = []): void
     {
         $nextPath = $currentPath + 1;
         $pattern = '/^\{.*\}$/';
@@ -75,7 +68,7 @@ class Router
         }
     }
 
-    private static function findFile(string $path, string $name) : string|bool
+    private static function findFile(string $path, string $name): string | bool
     {
 
         if (file_exists(self::$dir . "$path/$name.php")) {
@@ -96,7 +89,7 @@ class Router
         return false;
     }
 
-    public static function findFolder(string $path, string $name) :string
+    public static function findFolder(string $path, string $name): string
     {
 
         $fullPath = self::$dir . $path;
@@ -121,7 +114,7 @@ class Router
 
 }
 
-function render(string $_FILE_PATH, array $_GET_REQUEST = []) :void
+function render(string $_FILE_PATH, array $_GET_REQUEST = []): void
 {
     include $_FILE_PATH;
 }
