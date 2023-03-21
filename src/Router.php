@@ -10,89 +10,72 @@ class Router
         self::$dir = $page_dir;
         if (empty($path)) {
             if (file_exists($page_dir . "index.php")) {
-                echo self::render("/", 'index');
-            } elseif (file_exists($page_dir . "404.php")) {
-                echo self::render("/", '404');
+                render("$page_dir/index.php");
             } else {
-                echo "404";
+                self::throwNotFound();
             }
             exit;
         }
 
         $pathArray = explode("/", $path);
 
-        echo self::router(pathArray:$pathArray, currentPath:0);
+        self::router($pathArray, currentPath:0);
     }
 
-    private static function router(array $pathArray, int $currentPath, string $foldersPath = "/", array $req = [])
+    /**
+     * @param array $pathArray
+     * @param int $currentPath
+     * @param string $foldersPath
+     * @param array $req
+     * @return void
+     */
+    private static function router(array $pathArray, int $currentPath, string $foldersPath = "", array $req = []) : void
     {
         $nextPath = $currentPath + 1;
-        $previousPath = $currentPath - 1;
         $pattern = '/^\{.*\}$/';
-        $path = implode('/', array_slice($pathArray, 0, -1));
+        $path = implode('/', array_slice($pathArray, 0, -1)) . "/";
 
-        if (!isset($pathArray[$nextPath])) {
-            $fileName = !isset($pathArray[$previousPath]) ? self::findFile("/", $pathArray[$currentPath]) : self::findFile($path, $pathArray[$currentPath]);
-            $namespace = str_replace(['{', '}'], '', $foldersPath);
-            $namespace = str_replace('/', '\\', $namespace);
-            $namespace = substr($namespace, 1);
-            $className = $namespace . "App";
+        if (!array_key_exists($nextPath, $pathArray)) {
+            $fileName = $currentPath > 0 ? self::findFile($foldersPath, $pathArray[$currentPath]) : self::findFile("/", $pathArray[$currentPath]);
             if ($fileName) {
                 if (preg_match($pattern, $fileName)) {
-                    $key = substr($fileName, 1, strlen($fileName) - 2);
+                    $key = substr($fileName, 1, -1);
                     $req[$key] = $pathArray[$currentPath];
-                    return self::render($path, $fileName, $className, $req);
-                } else {
-                    return self::render($path, $fileName, $className, $req);
                 }
-            } elseif (file_exists(self::$dir . "404.php")) {
-                return self::render("/", '404');
+                render(self::$dir . $path . $fileName . ".php", $req);
             } else {
-                return "404";
+                self::throwNotFound();
             }
 
+            exit;
         }
 
         $folderName = self::findFolder($foldersPath, $pathArray[$currentPath]);
 
-        $folderName = !isset($pathArray[$previousPath]) ? self::findFolder("/", $pathArray[$currentPath]) : self::findFolder($foldersPath, $pathArray[$currentPath]);
-        $foldersPath .= $folderName . "/";
+        if ($folderName && preg_match($pattern, $folderName)) {
+            $key = substr($folderName, 1, -1);
 
-        if ($folderName) {
-
-            if (preg_match($pattern, $folderName)) {
-                $key = substr($folderName, 1, strlen($folderName) - 2);
-                $req[$key] = $pathArray[$currentPath];
-            }
-            $pathArray[$currentPath] = $folderName;
+            $req[$key] = $pathArray[$currentPath];
         }
 
-        return self::router($pathArray, currentPath:$nextPath, foldersPath:$foldersPath, req:$req);
+        $foldersPath .= "/" . $folderName;
+        $pathArray[$currentPath] = $folderName;
+
+        self::router($pathArray, $nextPath, $foldersPath, $req);
     }
 
-    private static function render($path, $name, $className = "App", $req = [])
+    private static function throwNotFound()
     {
-        $className = empty($className) ? 'pages\\App' : 'pages\\' . $className;
-
-        if (substr($path, -1) !== '/') {
-            $path .= '/';
-        }
-
-        include self::$dir . $path . $name . ".php";
-
-        if (class_exists("$name") || class_exists($className)) {
-            $obj = new $className();
-            if (method_exists($obj, "render")) {
-                $obj->render($req);
-            } else {
-                echo "Erro: a classe " . $className . " não possui um método render";
-            }
+        if (file_exists(self::$dir . "404.php")) {
+            render(self::$dir . "/404.php");
+            exit;
         } else {
-            echo "Erro: a classe " . $className . " não foi encontrada";
+            echo "404";
+            exit;
         }
     }
 
-    private static function findFile($path, $name)
+    private static function findFile(string $path, string $name) : string|bool
     {
 
         if (file_exists(self::$dir . "$path/$name.php")) {
@@ -100,7 +83,6 @@ class Router
         }
 
         $pattern = '/^{.*}\.php$/';
-
         $files = glob(self::$dir . "$path/*.php");
 
         foreach ($files as $file) {
@@ -114,7 +96,7 @@ class Router
         return false;
     }
 
-    public static function findFolder($path, $name)
+    public static function findFolder(string $path, string $name) :string
     {
 
         $fullPath = self::$dir . $path;
@@ -134,7 +116,12 @@ class Router
             }
         }
 
-        return false;
+        return $name;
     }
 
+}
+
+function render(string $_FILE_PATH, array $_GET_REQUEST = []) :void
+{
+    include $_FILE_PATH;
 }

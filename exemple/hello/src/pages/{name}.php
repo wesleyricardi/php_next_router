@@ -1,12 +1,5 @@
 <?php
-namespace Pages;
 
-class App
-{
-    public static function render($req)
-    {
-        $name = $req['name'];
+$name = $_GET_REQUEST['name'];
 
-        echo "Hello, $name";
-    }
-}
+echo "Hello, $name";

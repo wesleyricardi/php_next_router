@@ -4,9 +4,7 @@ The Next router is a lightweight and user-friendly PHP router that allows develo
 
 ## Installation
 
-To install the PHP Next router, simply run the following command in your terminal:
-
-composer require next/router
+Download and include the Router.php on your index.php file and use the namespace use Next\Router\Router;
 
 ## Usage
 
@@ -15,24 +13,16 @@ To use the PHP Router library, include the Router::start() function in your PHP 
 <?php
 require_once 'vendor/autoload.php';
 
-Create a pages folder inside the src directory or set a custom path with Router::start("custom/path/"). Now, any file inside the pages directory or your custom path can become a router. For example, src/pages/hello.php can be accessed by localhost/index.php?path=hello. To access a file inside another page, use localhost/index.php?path=pagename/filename.
+Create a pages folder inside the src directory or set a custom path with:
+Router::start("custom/path/"). 
 
-For dynamic paths, you can name the folder or file start with { and end with } (e.g., {name}.php). To access the file, you must create a class App with a method render and a namespace where the file is located, like:
+Now, any file inside the pages directory or your custom path can become a router. For example, src/pages/hello.php can be accessed by localhost/index.php?path=hello. To access a file inside another page, use localhost/index.php?path=pagename/filename.
 
-<?php
-namespace Pages;
+For dynamic paths, you can name the folder or file start with { and end with } (e.g., {name}.php). 
 
-class App
-{
-    public static function render($req)
-    {
-        echo "Home page";
-    }
-}
+If the folder or file name starts with { and ends with }, the namespace needs to be without { and }. The $req variable is an array, and to get the value of the dynamic path, you need to use the name inside {}. For example, if you have the path /src/pages/product/{category}/{name}.php, to get the category, you need to use $_GET_REQUEST["category"], and to get the name, use $_GET_REQUEST["name"].
 
-?>
-
-If the folder or file name starts with { and ends with }, the namespace needs to be without { and }. The $req variable is an array, and to get the value of the dynamic path, you need to use the name inside {}. For example, if you have the path /src/pages/product/{category}/{name}.php, to get the category, you need to use $req["category"], and to get the name, use $req["name"].
+To access the page the link must be http://localhost/index.php?path=product/tech/computer or you can use apache rewrite to use http://localhost/product/tech/computer.
 
 ## Conclusion
 
