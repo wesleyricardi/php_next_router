@@ -57,7 +57,7 @@ class Router
         self::router($pathArray, $nextPath, $foldersPath, $req);
     }
 
-    private static function throwNotFound()
+    private static function throwNotFound(): void
     {
         if (file_exists(self::$dir . "404.php")) {
             render(self::$dir . "/404.php");
