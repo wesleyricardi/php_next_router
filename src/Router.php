@@ -6,11 +6,28 @@ class Router
     private static $dir;
     public static function start(string $page_dir = "src/pages/"): void
     {
-        $path = isset($_GET['path']) ? $_GET['path'] : "";
+        $request_url = $_SERVER['REQUEST_URI'];
+        $request_url = explode("?", $request_url);
+
+        $path = $request_url[0];
+
+        $query = [];
+        if (array_key_exists(1, $request_url)) {
+          $array_query = explode("&", $request_url[1]);
+          foreach ($array_query as &$value) {
+            $query_field = explode("=", $value);
+            if (array_key_exists(1, $query_field)) {
+              $query[$query_field[0]] = $query_field[1];
+            } else {
+              $query[$query_field[0]] = "";
+            }
+          }
+        }
+
         self::$dir = $page_dir;
-        if (empty($path)) {
+        if ($path == "/") {
             if (file_exists($page_dir . "index.php")) {
-                render("$page_dir/index.php");
+                render("$page_dir/index.php", [], $query);
             } else {
                 self::throwNotFound();
             }
@@ -19,10 +36,10 @@ class Router
 
         $pathArray = explode("/", $path);
 
-        self::router($pathArray, currentPath:0);
+        self::router($pathArray, currentPath:0, query:$query);
     }
 
-    private static function router(array $pathArray, int $currentPath, string $foldersPath = "", array $req = []): void
+    private static function router(array $pathArray, int $currentPath, string $foldersPath = "", array $req = [], array $query = []): void
     {
         $nextPath = $currentPath + 1;
         $pattern = '/^\{.*\}$/';
@@ -35,7 +52,7 @@ class Router
                     $key = substr($fileName, 1, -1);
                     $req[$key] = $pathArray[$currentPath];
                 }
-                render(self::$dir . $path . $fileName . ".php", $req);
+                render(self::$dir . $path . $fileName . ".php", $req, $query);
             } else {
                 self::throwNotFound();
             }
@@ -54,7 +71,7 @@ class Router
         $foldersPath .= "/" . $folderName;
         $pathArray[$currentPath] = $folderName;
 
-        self::router($pathArray, $nextPath, $foldersPath, $req);
+        self::router($pathArray, $nextPath, $foldersPath, $req, $query);
     }
 
     private static function throwNotFound(): void
@@ -114,7 +131,7 @@ class Router
 
 }
 
-function render(string $_FILE_PATH, array $_GET_REQUEST = []): void
+function render(string $_FILE_PATH, array $_GET_REQUEST = [], array $_GET_QUERY = []): void
 {
     include $_FILE_PATH;
 }
