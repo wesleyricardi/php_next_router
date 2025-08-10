@@ -7,21 +7,13 @@ class Router
     public static function start(string $page_dir = "src/pages/"): void
     {
         $request_url = $_SERVER['REQUEST_URI'];
-        $request_url = explode("?", $request_url);
+        $url = parse_url($request_url);
 
-        $path = $request_url[0];
+        $path = $url['path'] ?? '/';
 
         $query = [];
-        if (array_key_exists(1, $request_url)) {
-          $array_query = explode("&", $request_url[1]);
-          foreach ($array_query as &$value) {
-            $query_field = explode("=", $value);
-            if (array_key_exists(1, $query_field)) {
-              $query[$query_field[0]] = $query_field[1];
-            } else {
-              $query[$query_field[0]] = "";
-            }
-          }
+        if (isset($url['query'])) {
+            parse_str($url['query'], $query);
         }
 
         self::$dir = $page_dir;
