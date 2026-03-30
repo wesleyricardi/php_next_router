@@ -1,5 +1,9 @@
 <?php
-require "../../../router/src/Router.php";
+declare(strict_types=1);
+
+require __DIR__ . '/../../src/Router.php';
+
 use Next\Router\Router;
 
-Router::start("src/pages/"); //default page path is "src/pages/"
+$router = new Router(__DIR__ . '/src/app');
+$router->start();
